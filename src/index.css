@@ -6,8 +6,9 @@ body {
   margin: 0;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
     sans-serif;
-  background: #f5efe7;
-  color: #1e1b18;
+  background: #f8f0e7;
+  color: #1e1a18;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
