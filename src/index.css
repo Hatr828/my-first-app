@@ -1,6 +1,13 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
+    sans-serif;
+  background: #f5efe7;
+  color: #1e1b18;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

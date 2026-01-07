@@ -1,119 +1,192 @@
-import { useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from 'react';
 import './App.css';
 
-const clubProfile = {
-  name: 'North Harbor FC',
-  city: 'Saint Petersburg',
-  founded: 1924,
-  stadium: 'Aurora Park',
-  coach: 'Daria Volkova',
-};
+const TodoContext = createContext(null);
+const storageKey = 'todo-items';
 
-const achievements = [
-  { label: 'League titles', value: 6 },
-  { label: 'National cups', value: 4 },
-  { label: 'Goals scored', value: 312 },
-  { label: 'Clean sheets', value: 128 },
+const fallbackTasks = [
+  { id: 'task-1', text: 'Plan matchday checklist', completed: false },
+  { id: 'task-2', text: 'Send training reminders', completed: true },
+  { id: 'task-3', text: 'Update travel roster', completed: false },
 ];
 
-const squad = [
-  { name: 'Kirill Antonov', position: 'Goalkeeper' },
-  { name: 'Maksim Belov', position: 'Center back' },
-  { name: 'Oleg Sidorov', position: 'Right back' },
-  { name: 'Roman Pavlov', position: 'Midfielder' },
-  { name: 'Ilya Petrov', position: 'Forward' },
-  { name: 'Denis Orlov', position: 'Winger' },
-];
+function loadTasks() {
+  if (typeof localStorage === 'undefined') {
+    return fallbackTasks;
+  }
 
-const themeClasses = [
-  'theme-sunset',
-  'theme-forest',
-  'theme-ocean',
-  'theme-gold',
-];
-
-function ClubInfo({ club, themeClass }) {
-  return (
-    <section className={`card club-info ${themeClass}`}>
-      <h2 className="card-title">Club snapshot</h2>
-      <ul className="info-list">
-        <li>
-          <span>Club</span>
-          <strong>{club.name}</strong>
-        </li>
-        <li>
-          <span>City</span>
-          <strong>{club.city}</strong>
-        </li>
-        <li>
-          <span>Founded</span>
-          <strong>{club.founded}</strong>
-        </li>
-        <li>
-          <span>Stadium</span>
-          <strong>{club.stadium}</strong>
-        </li>
-        <li>
-          <span>Head coach</span>
-          <strong>{club.coach}</strong>
-        </li>
-      </ul>
-    </section>
-  );
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (!stored) {
+      return fallbackTasks;
+    }
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : fallbackTasks;
+  } catch {
+    return fallbackTasks;
+  }
 }
 
-function ClubAchievements({ items }) {
+function createTodo(text) {
+  return {
+    id: `todo-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    text,
+    completed: false,
+  };
+}
+
+function todoReducer(state, action) {
+  switch (action.type) {
+    case 'add':
+      return [createTodo(action.text), ...state];
+    case 'toggle':
+      return state.map((todo) =>
+        todo.id === action.id ? { ...todo, completed: !todo.completed } : todo
+      );
+    case 'remove':
+      return state.filter((todo) => todo.id !== action.id);
+    case 'set':
+      return action.items;
+    default:
+      return state;
+  }
+}
+
+function TodoProvider({ children }) {
+  const [tasks, dispatch] = useReducer(todoReducer, [], loadTasks);
+
+  useEffect(() => {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    localStorage.setItem(storageKey, JSON.stringify(tasks));
+  }, [tasks]);
+
+  const value = useMemo(() => ({ tasks, dispatch }), [tasks, dispatch]);
+
+  return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;
+}
+
+function useTodos() {
+  const context = useContext(TodoContext);
+  if (!context) {
+    throw new Error('TodoContext is missing.');
+  }
+  return context;
+}
+
+function TodoSummary() {
+  const { tasks } = useTodos();
+  const completed = tasks.filter((task) => task.completed).length;
+  const remaining = tasks.length - completed;
+
   return (
-    <section className="card">
-      <h2 className="card-title">Achievements</h2>
-      <div className="stats-grid">
-        {items.map((item) => (
-          <div key={item.label} className="stat">
-            <span className="stat-value">{item.value}</span>
-            <span className="stat-label">{item.label}</span>
-          </div>
-        ))}
+    <div className="summary">
+      <div>
+        <span className="summary-count">{completed}</span>
+        <span className="summary-label">done</span>
       </div>
-    </section>
+      <div>
+        <span className="summary-count">{remaining}</span>
+        <span className="summary-label">open</span>
+      </div>
+    </div>
   );
 }
 
-function ClubSquad({ players }) {
+function TodoForm() {
+  const { dispatch } = useTodos();
+  const [text, setText] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return;
+    }
+    dispatch({ type: 'add', text: trimmed });
+    setText('');
+  };
+
   return (
-    <section className="card">
-      <h2 className="card-title">Current squad</h2>
-      <ul className="squad-list">
-        {players.map((player) => (
-          <li key={player.name}>
-            <span>{player.name}</span>
-            <strong>{player.position}</strong>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <form className="todo-form" onSubmit={handleSubmit}>
+      <input
+        className="todo-input"
+        type="text"
+        placeholder="Add a new task..."
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <button className="todo-button" type="submit">
+        Add task
+      </button>
+    </form>
+  );
+}
+
+function TodoList() {
+  const { tasks, dispatch } = useTodos();
+  const [list, setList] = useState(tasks);
+
+  useEffect(() => {
+    setList(tasks);
+  }, [tasks]);
+
+  if (list.length === 0) {
+    return <p className="empty-state">No tasks yet. Add your first one.</p>;
+  }
+
+  return (
+    <ul className="todo-list">
+      {list.map((task, index) => (
+        <li
+          key={task.id}
+          className={`todo-item ${task.completed ? 'is-complete' : ''}`}
+          style={{ '--delay': `${index * 70}ms` }}
+          onClick={() => dispatch({ type: 'toggle', id: task.id })}
+        >
+          <div className="todo-main">
+            <span className="todo-title">{task.text}</span>
+            <span className="todo-status">
+              {task.completed ? 'Done' : 'Active'}
+            </span>
+          </div>
+          <button
+            className="todo-remove"
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              dispatch({ type: 'remove', id: task.id });
+            }}
+          >
+            Remove
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 function App() {
-  const themeClass = useMemo(() => {
-    const index = Math.floor(Math.random() * themeClasses.length);
-    return themeClasses[index];
-  }, []);
-
   return (
-    <div className="App">
-      <main className="page">
-        <header className="page-header">
-          <p className="eyebrow">Football club profile</p>
-          <h1>{clubProfile.name}</h1>
-        </header>
-        <div className="grid">
-          <ClubInfo club={clubProfile} themeClass={themeClass} />
-          <ClubAchievements items={achievements} />
-          <ClubSquad players={squad} />
-        </div>
-      </main>
-    </div>
+    <TodoProvider>
+      <div className="App">
+        <main className="app-shell">
+          <section className="panel">
+            <TodoForm />
+            <TodoSummary />
+            <TodoList />
+          </section>
+        </main>
+      </div>
+    </TodoProvider>
   );
 }
 
