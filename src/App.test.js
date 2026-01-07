@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders feedback form', () => {
+test('renders to-do list heading', () => {
   render(<App />);
-  const heading = screen.getByRole('heading', { name: /feedback form/i });
+  const heading = screen.getByRole('heading', { name: /to-do list/i });
   expect(heading).toBeInTheDocument();
 });
