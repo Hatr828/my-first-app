@@ -1,50 +1,28 @@
 {
-  "name": "flux-streaming-platform",
+  "name": "my-first-app",
   "version": "1.0.0",
-  "description": "A Netflix-inspired streaming platform UI built with React, TypeScript, and Vite. AI-generated educational demonstration project. Uses ppv.to API for video streaming - developer has no control or responsibility for third-party API content.",
-  "type": "module",
-  "author": "",
-  "license": "MIT",
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/enyw/flux.git"
+    "url": "git+https://github.com/Hatr828/my-first-app.git"
   },
-  "keywords": [
-    "streaming",
-    "movies",
-    "tv-shows",
-    "react",
-    "typescript",
-    "vite",
-    "netflix-clone",
-    "tmdb",
-    "video-player",
-    "entertainment"
-  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/enyw/flux/issues"
+    "url": "https://github.com/Hatr828/my-first-app/issues"
   },
-  "homepage": "https://github.com/enyw/flux#readme",
-  "scripts": {
-    "setup": "node scripts/setup.js",
-    "postinstall": "node scripts/setup.js",
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "get-ip": "./get-ip.sh"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0",
-    "framer-motion": "^10.16.16"
-  },
+  "homepage": "https://github.com/Hatr828/my-first-app#readme",
   "devDependencies": {
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "css-loader": "^7.1.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1"
   }
 }
-
